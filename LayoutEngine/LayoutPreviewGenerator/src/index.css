@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+    background-color: lightcyan;
+    width:min-content;
+    height: min-content;
+    overflow: hidden;
+    position: relative;
+}

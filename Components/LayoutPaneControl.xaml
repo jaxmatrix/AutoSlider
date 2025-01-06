@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="LayoutPaneControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AutoSlider"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" Width="287">
+    <Grid>
+        <ScrollViewer>
+            <StackPanel x:Name="stkLayoutPanel" Margin="0,10,0,-10">
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
