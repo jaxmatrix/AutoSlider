@@ -1,4 +1,8 @@
-﻿Namespace Data.Content
+﻿Imports Microsoft.Office.Interop.PowerPoint
+Imports Microsoft.Office.Core
+Imports Shape = Microsoft.Office.Interop.PowerPoint.Shape
+
+Namespace Data.Content
     Public Enum TextTypes
         Header
         SubHeader
@@ -32,9 +36,16 @@
         End Property
 
         Public Sub New(type As TextTypes, content As String)
+            Me.type = type
+            Me.content = content
         End Sub
 
-        Public Sub Render()
+        Public Sub Render(NewSlide As Slide, Orientation As MsoTextOrientation, left As Integer, top As Integer, width As Integer, height As Integer)
+            Dim TextBox As Shape = NewSlide.Shapes.AddTextbox(Orientation, left, top, width, height)
+            TextBox.TextFrame.TextRange.Text = _content
+
+            'TODO: Add the style for the shape based on enum 
+
             Rerender = False
         End Sub
     End Class

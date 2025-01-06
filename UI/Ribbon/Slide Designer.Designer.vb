@@ -45,6 +45,7 @@
         Me.tbSlideGenerator = Me.Factory.CreateRibbonTab
         Me.Group1 = Me.Factory.CreateRibbonGroup
         Me.btnGenerate = Me.Factory.CreateRibbonButton
+        Me.btnAutoSlide = Me.Factory.CreateRibbonButton
         Me.tbSlideGenerator.SuspendLayout()
         Me.Group1.SuspendLayout()
         Me.SuspendLayout()
@@ -59,6 +60,7 @@
         'Group1
         '
         Me.Group1.Items.Add(Me.btnGenerate)
+        Me.Group1.Items.Add(Me.btnAutoSlide)
         Me.Group1.Label = "Group1"
         Me.Group1.Name = "Group1"
         '
@@ -68,6 +70,13 @@
         Me.btnGenerate.Label = "Generate"
         Me.btnGenerate.Name = "btnGenerate"
         Me.btnGenerate.ShowImage = True
+        '
+        'btnAutoSlide
+        '
+        Me.btnAutoSlide.Image = CType(resources.GetObject("btnAutoSlide.Image"), System.Drawing.Image)
+        Me.btnAutoSlide.Label = "AutoSlide"
+        Me.btnAutoSlide.Name = "btnAutoSlide"
+        Me.btnAutoSlide.ShowImage = True
         '
         'Slide_Designer
         '
@@ -85,6 +94,7 @@
     Friend WithEvents tbSlideGenerator As Microsoft.Office.Tools.Ribbon.RibbonTab
     Friend WithEvents Group1 As Microsoft.Office.Tools.Ribbon.RibbonGroup
     Friend WithEvents btnGenerate As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents btnAutoSlide As Microsoft.Office.Tools.Ribbon.RibbonButton
 End Class
 
 Partial Class ThisRibbonCollection
