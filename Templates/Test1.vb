@@ -7,6 +7,33 @@ Namespace SlideTemplates
     ''' title and a list of information. All this data will be used to descripbe a image that will be seen at 2:4 of
     ''' of the width of the space
     ''' </summary>
+
+    Enum SlideComponents
+        TextHeading
+        Text
+        TextList
+        Image
+        Cosmetic
+    End Enum
+
+    Module EnumProcessor
+        Function SlideComponentsName(componentEnum As SlideComponents)
+            Select Case componentEnum
+                Case SlideComponents.TextHeading
+                    Return "TextHeading"
+                Case SlideComponents.Text
+                    Return "Text"
+                Case SlideComponents.TextList
+                    Return "TextList"
+                Case SlideComponents.Image
+                    Return "Image"
+                Case Else
+                    Return "Cosmetic"
+            End Select
+        End Function
+
+    End Module
+
     Public Class Test1
 
         Private _title As Data.Content.Text

@@ -46,14 +46,19 @@
         Me.Group1 = Me.Factory.CreateRibbonGroup
         Me.btnGenerate = Me.Factory.CreateRibbonButton
         Me.btnAutoSlide = Me.Factory.CreateRibbonButton
+        Me.btnCaptureLayout = Me.Factory.CreateRibbonButton
+        Me.Group2 = Me.Factory.CreateRibbonGroup
+        Me.Button1 = Me.Factory.CreateRibbonButton
         Me.tbSlideGenerator.SuspendLayout()
         Me.Group1.SuspendLayout()
+        Me.Group2.SuspendLayout()
         Me.SuspendLayout()
         '
         'tbSlideGenerator
         '
         Me.tbSlideGenerator.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office
         Me.tbSlideGenerator.Groups.Add(Me.Group1)
+        Me.tbSlideGenerator.Groups.Add(Me.Group2)
         Me.tbSlideGenerator.Label = "Slide Generator"
         Me.tbSlideGenerator.Name = "tbSlideGenerator"
         '
@@ -61,7 +66,7 @@
         '
         Me.Group1.Items.Add(Me.btnGenerate)
         Me.Group1.Items.Add(Me.btnAutoSlide)
-        Me.Group1.Label = "Group1"
+        Me.Group1.Label = "Ai"
         Me.Group1.Name = "Group1"
         '
         'btnGenerate
@@ -78,6 +83,27 @@
         Me.btnAutoSlide.Name = "btnAutoSlide"
         Me.btnAutoSlide.ShowImage = True
         '
+        'btnCaptureLayout
+        '
+        Me.btnCaptureLayout.Image = CType(resources.GetObject("btnCaptureLayout.Image"), System.Drawing.Image)
+        Me.btnCaptureLayout.Label = "Capture Layout"
+        Me.btnCaptureLayout.Name = "btnCaptureLayout"
+        Me.btnCaptureLayout.ShowImage = True
+        '
+        'Group2
+        '
+        Me.Group2.Items.Add(Me.btnCaptureLayout)
+        Me.Group2.Items.Add(Me.Button1)
+        Me.Group2.Label = "Generator"
+        Me.Group2.Name = "Group2"
+        '
+        'Button1
+        '
+        Me.Button1.Image = CType(resources.GetObject("Button1.Image"), System.Drawing.Image)
+        Me.Button1.Label = "Capture Components"
+        Me.Button1.Name = "Button1"
+        Me.Button1.ShowImage = True
+        '
         'Slide_Designer
         '
         Me.Name = "Slide_Designer"
@@ -87,6 +113,8 @@
         Me.tbSlideGenerator.PerformLayout()
         Me.Group1.ResumeLayout(False)
         Me.Group1.PerformLayout()
+        Me.Group2.ResumeLayout(False)
+        Me.Group2.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -95,6 +123,9 @@
     Friend WithEvents Group1 As Microsoft.Office.Tools.Ribbon.RibbonGroup
     Friend WithEvents btnGenerate As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents btnAutoSlide As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents btnCaptureLayout As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents Group2 As Microsoft.Office.Tools.Ribbon.RibbonGroup
+    Friend WithEvents Button1 As Microsoft.Office.Tools.Ribbon.RibbonButton
 End Class
 
 Partial Class ThisRibbonCollection
