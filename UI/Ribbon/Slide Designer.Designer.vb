@@ -46,8 +46,8 @@
         Me.Group1 = Me.Factory.CreateRibbonGroup
         Me.btnGenerate = Me.Factory.CreateRibbonButton
         Me.btnAutoSlide = Me.Factory.CreateRibbonButton
-        Me.btnCaptureLayout = Me.Factory.CreateRibbonButton
         Me.Group2 = Me.Factory.CreateRibbonGroup
+        Me.btnCaptureLayout = Me.Factory.CreateRibbonButton
         Me.Button1 = Me.Factory.CreateRibbonButton
         Me.tbSlideGenerator.SuspendLayout()
         Me.Group1.SuspendLayout()
@@ -83,19 +83,19 @@
         Me.btnAutoSlide.Name = "btnAutoSlide"
         Me.btnAutoSlide.ShowImage = True
         '
-        'btnCaptureLayout
-        '
-        Me.btnCaptureLayout.Image = CType(resources.GetObject("btnCaptureLayout.Image"), System.Drawing.Image)
-        Me.btnCaptureLayout.Label = "Capture Layout"
-        Me.btnCaptureLayout.Name = "btnCaptureLayout"
-        Me.btnCaptureLayout.ShowImage = True
-        '
         'Group2
         '
         Me.Group2.Items.Add(Me.btnCaptureLayout)
         Me.Group2.Items.Add(Me.Button1)
         Me.Group2.Label = "Generator"
         Me.Group2.Name = "Group2"
+        '
+        'btnCaptureLayout
+        '
+        Me.btnCaptureLayout.Image = CType(resources.GetObject("btnCaptureLayout.Image"), System.Drawing.Image)
+        Me.btnCaptureLayout.Label = "Capture Layout"
+        Me.btnCaptureLayout.Name = "btnCaptureLayout"
+        Me.btnCaptureLayout.ShowImage = True
         '
         'Button1
         '

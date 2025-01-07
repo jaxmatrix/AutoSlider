@@ -6,10 +6,9 @@ Imports System.Windows.Forms
 Imports Application = Microsoft.Office.Interop.PowerPoint.Application
 Imports AutoSlider.SlideTemplates
 Imports System.Diagnostics
-Imports System.Text.RegularExpressions
 Imports Newtonsoft.Json
 Imports System.IO
-Imports System.Collections.Specialized
+Imports AutoSlider.SlideTemplates.Enums
 
 Public Class Slide_Designer
     Private Sub Slide_Designer_Load(ByVal sender As System.Object, ByVal e As RibbonUIEventArgs) Handles MyBase.Load
@@ -102,8 +101,8 @@ Public Class Slide_Designer
 
     Private Sub btnCaptureLayout_Click(sender As Object, e As RibbonControlEventArgs) Handles btnCaptureLayout.Click
         'Get the active power point presentation and extract the information from the layout 
-        Dim pptApp As PowerPoint.Application = Globals.ThisAddIn.Application
-        Dim presentation As PowerPoint.Presentation = pptApp.ActivePresentation
+        Dim pptApp As Application = Globals.ThisAddIn.Application
+        Dim presentation As Presentation = pptApp.ActivePresentation
         Dim activeWindow As DocumentWindow = pptApp.ActiveWindow
 
 
@@ -113,8 +112,8 @@ Public Class Slide_Designer
             Dim LayoutProperties As New Dictionary(Of String, Object)
             Dim CosmeticShapes = New List(Of Dictionary(Of String, Object))
 
-            For Each shape As PowerPoint.Shape In currentSlide.Shapes
-                Dim elementType As SlideComponents = SlideComponents.Cosmetic
+            For Each shape As Shape In currentSlide.Shapes
+                Dim elementType As SlideComponents = LayoutComponents.Cosmetic
 
                 If shape.Type = MsoShapeType.msoGroup Then
                     For Each groupItem As Shape In shape.GroupItems
@@ -122,15 +121,15 @@ Public Class Slide_Designer
                             If groupItem.HasTextFrame Then
                                 If groupItem.TextFrame.HasText Then
                                     Dim textHint As String = groupItem.TextFrame.TextRange.Text
-                                    elementType = CheckTextHint(textHint)
+                                    elementType = GetLayoutComponentEnum(textHint)
                                 End If
                             End If
                         End If
                     Next
-                    If elementType = SlideComponents.Cosmetic Then
+                    If elementType = LayoutComponents.Cosmetic Then
                         CosmeticShapes.Add(CaptureGroupProperties(shape))
                     Else
-                        LayoutProperties(SlideComponentsName(elementType)) = CaptureGroupProperties(shape)
+                        LayoutProperties(GetLayoutComponentName(elementType)) = CaptureGroupProperties(shape)
                     End If
 
                     Debug.WriteLine($"Detected Group {elementType}")
@@ -138,19 +137,19 @@ Public Class Slide_Designer
                     If shape.HasTextFrame Then
                         If shape.TextFrame.HasText Then
                             Dim textHint As String = shape.TextFrame.TextRange.Text
-                            elementType = CheckTextHint(textHint)
+                            elementType = GetLayoutComponentEnum(textHint)
                         End If
                     End If
 
-                    If elementType = SlideComponents.Cosmetic Then
+                    If elementType = LayoutComponents.Cosmetic Then
                         CosmeticShapes.Add(CaptureShapeProperties(shape))
                     Else
-                        LayoutProperties(SlideComponentsName(elementType)) = CaptureShapeProperties(shape)
+                        LayoutProperties(GetLayoutComponentName(elementType)) = CaptureShapeProperties(shape)
                     End If
 
                 End If
             Next
-            LayoutProperties(SlideComponentsName(SlideComponents.Cosmetic)) = CosmeticShapes
+            LayoutProperties(GetLayoutComponentName(LayoutComponents.Cosmetic)) = CosmeticShapes
 
             Dim json As String = JsonConvert.SerializeObject(LayoutProperties, Formatting.Indented)
             Dim randomFileName As String = "DictionaryData_" & Guid.NewGuid().ToString() & ".json"
@@ -172,7 +171,7 @@ Public Class Slide_Designer
     End Sub
 
 
-    Private Function CaptureShapeProperties(shape As PowerPoint.Shape)
+    Private Function CaptureShapeProperties(shape As Shape)
         Dim shapeProperties As New Dictionary(Of String, Object)
 
         ' General properties
@@ -311,21 +310,37 @@ Public Class Slide_Designer
         ' Serialize to JSON
         Return groupProperties
     End Function
-    Private Function CheckTextHint(textHint As String) As SlideTemplates.SlideComponents
-        Debug.WriteLine($"Text Hint : {textHint}")
-        Select Case textHint
-            Case "Title"
-                Return SlideTemplates.SlideComponents.TextHeading
-            Case "Text"
-                Return SlideTemplates.SlideComponents.Text
-            Case "List Item"
-                Debug.WriteLine($"Text Hint - List Item Detected : {textHint}")
-                Return SlideTemplates.SlideComponents.TextList
-            Case "Image"
-                Return SlideTemplates.SlideComponents.Image
-            Case Else
-                Debug.WriteLine($"Text Hint - Cosmetic Item Detected : {textHint}")
-                Return SlideTemplates.SlideComponents.Cosmetic
-        End Select
+    Private Function GetSlideComponentEnum(textHint As String) As SlideComponents
+        Try
+            Return Processor.SlideComponents.StringToEnum(textHint)
+        Catch ex As Exception
+            Debug.WriteLine($"No Slide Component Description Detected : Fallback to cosmetic : {ex}")
+            Return SlideComponents.Cosmetic
+        End Try
+    End Function
+    Private Function GetSlideComponentName(Hint As SlideComponents) As String
+        Try
+            Return Processor.SlideComponents.EnumToString(Hint)
+        Catch ex As Exception
+            Debug.WriteLine($"No Slide Component Description Detected : Fallback to cosmetic : {ex}")
+            Return Processor.SlideComponents.EnumToString(SlideComponents.Cosmetic)
+        End Try
+    End Function
+
+    Private Function GetLayoutComponentEnum(textHint As String) As LayoutComponents
+        Try
+            Return Processor.LayoutComponents.StringToEnum(textHint)
+        Catch ex As Exception
+            Debug.WriteLine($"No Slide Component Description Detected : Fallback to cosmetic : {ex}")
+            Return LayoutComponents.Cosmetic
+        End Try
+    End Function
+    Private Function GetLayoutComponentName(Hint As LayoutComponents) As String
+        Try
+            Return Processor.LayoutComponents.EnumToString(Hint)
+        Catch ex As Exception
+            Debug.WriteLine($"No Slide Component Description Detected : Fallback to cosmetic : {ex}")
+            Return Processor.LayoutComponents.EnumToString(LayoutComponents.Cosmetic)
+        End Try
     End Function
 End Class

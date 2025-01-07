@@ -2,15 +2,15 @@
 Imports Microsoft.Office.Core
 
 Namespace Data.Content
-    Public Enum TextListTypes
+    Public Enum PointTypes
         Ordered
         Unordered
         Symbols
     End Enum
 
-    Public Class TextList
+    Public Class Points
         Private _content As List(Of String)
-        Private _type As TextListTypes
+        Private _type As PointTypes
         Public Property Rerender As Boolean
 
         Public Property content As List(Of String)
@@ -33,7 +33,7 @@ Namespace Data.Content
             End Set
         End Property
 
-        Public Sub New(type As TextListTypes, content As List(Of String))
+        Public Sub New(type As PointTypes, content As List(Of String))
             Me.type = type
             Me.content = content
         End Sub
