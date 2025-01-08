@@ -70,9 +70,9 @@ Namespace SlideTemplates
                     Case LayoutComponents.Points
                         GeneratePoints(Slide, Content("Points"), Layout("Points"))
                     Case LayoutComponents.Image
-                        GenerateTitle(Slide, Content("Title").ToString(), Layout("Title"))
+                        GenerateImage(Slide, Content("Image").ToString(), Layout("Image"))
                     Case LayoutComponents.Cosmetic
-                        GenerateTitle(Slide, Content("Title").ToString(), Layout("Title"))
+                        GenerateCosmetic(Slide, Layout("Cosmetic"))
                     Case Else
                         Debug.WriteLine($"Layout Element Implementation Pending {Key}")
                 End Select

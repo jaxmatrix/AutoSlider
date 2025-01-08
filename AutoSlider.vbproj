@@ -205,9 +205,10 @@
       <DependentUpon>LayoutSnapControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="LayoutEngine\LayoutGenerator\Layouts.vb" />
+    <Compile Include="Models\Content\Content.Cosmetic.vb" />
     <Compile Include="Models\Content\Content.Image.vb" />
     <Compile Include="Models\Content\Content.Text.vb" />
-    <Compile Include="Models\Content\Content.TextList.vb" />
+    <Compile Include="Models\Content\Content.Points.vb" />
     <Compile Include="Models\LayoutData.vb" />
     <Compile Include="Templates\Test1.vb" />
     <Compile Include="Templates\Utils\Enums.vb" />
