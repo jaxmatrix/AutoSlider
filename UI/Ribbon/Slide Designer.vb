@@ -304,12 +304,20 @@ Public Class Slide_Designer
                 itemProperties("LineWeight") = groupItem.Line.Weight
             End If
 
+            ' TODO : Add Additional Case for creating a property if the text contains
+            ' points and what type of points it is 
+
             groupItems.Add(itemProperties)
         Next
         groupProperties("GroupItems") = groupItems
 
         ' Serialize to JSON
         Return groupProperties
+    End Function
+
+    Private Function CaptureGroupProperties(groupShape As PowerPoint.Shape, Hint As SlideComponents)
+        Dim groupProperties = CaptureGroupProperties(groupShape)
+        ' TODO : Add additional functionality based on the text parsing of content of the list 
     End Function
     Private Function GetSlideComponentEnum(textHint As String) As SlideComponents
         Try

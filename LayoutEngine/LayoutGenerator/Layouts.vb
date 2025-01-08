@@ -52,12 +52,52 @@ Namespace SlideTemplates
 
         Public Sub Render(Slide As PowerPoint.Slide)
             ' First check the integrity of content and layout
+            Dim componentKey = Layout.Keys
+            _elements = New SlideElementListType
 
+            For Each Key As String In componentKey
+                Select Case Processor.LayoutComponents.EnumToString(Key)
+                    Case LayoutComponents.Title
+                    Case LayoutComponents.Description
+                    Case LayoutComponents.Points
+                    Case LayoutComponents.Image
+                    Case LayoutComponents.Cosmetic
+                End Select
 
-
+            Next
         End Sub
 
+        Private Function GenerateTitle(slide As PowerPoint.Slide,
+                                       content As String,
+                                       description As Dictionary(Of String, Object))
+            Dim title = New Data.Content.Text(Data.Content.TextTypes.Header,
+                                              content,
+                                              description)
+            title.Render(slide)
+            Return title
+
+        End Function
+        Private Function GenerateDescription(slide As PowerPoint.Slide,
+                                             Content As String,
+                                             description As Dictionary(Of String, Object))
+
+            Dim Desc = New Data.Content.Text(Data.Content.TextTypes.Text,
+                                              Content,
+                                              description)
+            Desc.Render(slide)
+            Return Desc
+        End Function
+        Private Function GeneratePoints(content As List(Of String), description As Dictionary(Of String, Object))
+
+        End Function
+        Private Function GenerateImage(tempPath As String, description As Dictionary(Of String, Object))
+        End Function
+        Private Function GenerateCosmetic(description As Dictionary(Of String, Object))
+        End Function
+
         Private Function Test_ContentAndLayout(content As SlideContentKeyValuePairType, layout As SlideLayoutComponentType)
+            ' TODO : Customize the check by removing the Cosmetic Keys from the layout
+
             Dim layoutKeys = layout.Keys
             Dim contentKeys = content.Keys
             Dim areKeysMatching As Boolean = layoutKeys.Count = contentKeys.Count AndAlso layoutKeys.All(Function(key) contentKeys.Contains(key))

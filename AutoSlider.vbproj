@@ -204,7 +204,7 @@
     <Compile Include="Components\LayoutSnapControl.xaml.vb">
       <DependentUpon>LayoutSnapControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LayoutEngine\LayoutGenerator\Class1.vb" />
+    <Compile Include="LayoutEngine\LayoutGenerator\Layouts.vb" />
     <Compile Include="Models\Content\Content.Image.vb" />
     <Compile Include="Models\Content\Content.Text.vb" />
     <Compile Include="Models\Content\Content.TextList.vb" />
