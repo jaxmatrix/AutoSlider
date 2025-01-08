@@ -1,6 +1,7 @@
 ﻿Imports Microsoft.Office.Interop.PowerPoint
 Imports Microsoft.Office.Core
 Imports System.Drawing.Imaging
+Imports Newtonsoft.Json.Linq
 
 Namespace Data.Content
     Public Enum PointTypes
@@ -12,7 +13,7 @@ Namespace Data.Content
     Public Class Points
         Private _content As List(Of String)
         Private _type As PointTypes
-        Private _description As Dictionary(Of String, Object)
+        Private _description As JObject
         Private _rerender As Boolean
         Private _gaps As Integer = 20
         Private _cols As Integer = 1
@@ -48,18 +49,18 @@ Namespace Data.Content
             End Set
         End Property
 
-        Public Property description As Dictionary(Of String, Object)
+        Public Property description As JObject
             Get
                 Return _description
             End Get
-            Set(value As Dictionary(Of String, Object))
+            Set(value As JObject)
                 _description = value
                 Rerender = True
             End Set
         End Property
 
-        Public Sub New(content As List(Of String), description As Dictionary(Of String, Object))
-            If description("Type") = MsoShapeType.msoGroup Then
+        Public Sub New(content As List(Of String), description As JObject)
+            If CType(description("Type").ToString(), MsoShapeType) = MsoShapeType.msoGroup Then
                 Me._type = PointTypes.Symbols
                 'TODO : Add functionality to detect other list types 
             End If
@@ -111,12 +112,12 @@ Namespace Data.Content
             Rerender = False
         End Sub
 
-        Private Function FindPointFrame(groupItems As List(Of Dictionary(Of String, Object)))
+        Private Function FindPointFrame(groupItems As JArray)
             ' TODO : Find the element with the Point text 
-            Dim PointItem As Dictionary(Of String, Object)
-            Dim SideItems As List(Of Dictionary(Of String, Object))
+            Dim PointItem As JObject
+            Dim SideItems As JArray
 
-            For Each item As Dictionary(Of String, Object) In groupItems
+            For Each item As JObject In groupItems
                 If item("Text").ToString().Contains("Points") Then
                     PointItem = item
                 Else
@@ -139,7 +140,7 @@ Namespace Data.Content
 
             Dim additionalShapes = New List(Of PowerPoint.Shape)
             For Each item In pointTemplateDescription.SideItems
-                Dim Type = CType(item("Type"), MsoShapeType)
+                Dim Type = CType(item("Type").ToString(), MsoShapeType)
                 Dim Height = item("Height")
                 Dim Width = item("Width")
                 Dim RelativeLeft = item("RelativeLeft")
@@ -161,10 +162,10 @@ Namespace Data.Content
     End Class
 
     Friend Structure PointTemplateDescription
-        Public PointItem As Dictionary(Of String, Object)
-        Public SideItems As List(Of Dictionary(Of String, Object))
+        Public PointItem As JObject
+        Public SideItems As JArray
 
-        Public Sub New(pointItem As Dictionary(Of String, Object), sideItems As List(Of Dictionary(Of String, Object)))
+        Public Sub New(pointItem As JObject, sideItems As JArray)
             Me.PointItem = pointItem
             Me.SideItems = sideItems
         End Sub
@@ -175,24 +176,24 @@ Namespace Data.Content
             End If
 
             Dim other = DirectCast(obj, PointTemplateDescription)
-            Return EqualityComparer(Of Dictionary(Of String, Object)).Default.Equals(PointItem, other.PointItem) AndAlso
-                   EqualityComparer(Of List(Of Dictionary(Of String, Object))).Default.Equals(SideItems, other.SideItems)
+            Return EqualityComparer(Of JObject).Default.Equals(PointItem, other.PointItem) AndAlso
+                   EqualityComparer(Of JArray).Default.Equals(SideItems, other.SideItems)
         End Function
 
         Public Overrides Function GetHashCode() As Integer
             Return (PointItem, SideItems).GetHashCode()
         End Function
 
-        Public Sub Deconstruct(ByRef pointItem As Dictionary(Of String, Object), ByRef sideItems As List(Of Dictionary(Of String, Object)))
+        Public Sub Deconstruct(ByRef pointItem As JObject, ByRef sideItems As JArray)
             pointItem = Me.PointItem
             sideItems = Me.SideItems
         End Sub
 
-        Public Shared Widening Operator CType(value As PointTemplateDescription) As (PointItem As Dictionary(Of String, Object), SideItems As List(Of Dictionary(Of String, Object)))
+        Public Shared Widening Operator CType(value As PointTemplateDescription) As (PointItem As JObject, SideItems As JArray)
             Return (value.PointItem, value.SideItems)
         End Operator
 
-        Public Shared Widening Operator CType(value As (PointItem As Dictionary(Of String, Object), SideItems As List(Of Dictionary(Of String, Object)))) As PointTemplateDescription
+        Public Shared Widening Operator CType(value As (PointItem As JObject, SideItems As JArray)) As PointTemplateDescription
             Return New PointTemplateDescription(value.PointItem, value.SideItems)
         End Operator
     End Structure

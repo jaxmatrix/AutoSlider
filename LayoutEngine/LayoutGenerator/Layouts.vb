@@ -1,10 +1,12 @@
-﻿
-Imports SlideComponentType = System.Collections.Generic.Dictionary(Of String, Object)
-Imports SlideLayoutComponentType = System.Collections.Generic.Dictionary(Of String, Object)
-Imports SlideElementListType = System.Collections.Generic.List(Of System.Collections.Generic.Dictionary(Of String, Object))
-Imports SlideContentKeyValuePairType = System.Collections.Generic.Dictionary(Of String, String)
+﻿Imports Newtonsoft.Json.Linq.JObject
+Imports SlideComponentType = Newtonsoft.Json.Linq.JObject
+Imports SlideLayoutComponentType = Newtonsoft.Json.Linq.JObject
+Imports SlideElementListType = Newtonsoft.Json.Linq.JArray
+Imports SlideContentKeyValuePairType = Newtonsoft.Json.Linq.JObject
+
 Imports System.Drawing.Imaging
 Imports System.Diagnostics
+Imports Newtonsoft.Json.Linq
 
 Namespace SlideTemplates
     Public Class Layouts
@@ -52,16 +54,23 @@ Namespace SlideTemplates
 
         Public Sub Render(Slide As PowerPoint.Slide)
             ' First check the integrity of content and layout
-            Dim componentKey = Layout.Keys
+            Dim componentKey = Layout.Properties().Select(Function(p) p.Name).ToList()
             _elements = New SlideElementListType
 
             For Each Key As String In componentKey
                 Select Case Processor.LayoutComponents.EnumToString(Key)
                     Case LayoutComponents.Title
+                        GenerateTitle(Slide, Content("Title").ToString(), Layout("Title"))
                     Case LayoutComponents.Description
+                        GenerateDescription(Slide, Content("Description").ToString(), Layout("Description"))
                     Case LayoutComponents.Points
+                        GenerateTitle(Slide, Content("Title").ToString(), Layout("Title"))
                     Case LayoutComponents.Image
+                        GenerateTitle(Slide, Content("Title").ToString(), Layout("Title"))
                     Case LayoutComponents.Cosmetic
+                        GenerateTitle(Slide, Content("Title").ToString(), Layout("Title"))
+                    Case Else
+                        Debug.WriteLine($"Layout Element Implementation Pending {Key}")
                 End Select
 
             Next
@@ -69,7 +78,7 @@ Namespace SlideTemplates
 
         Private Function GenerateTitle(slide As PowerPoint.Slide,
                                        content As String,
-                                       description As Dictionary(Of String, Object))
+                                       description As JObject)
             Dim title = New Data.Content.Text(Data.Content.TextTypes.Header,
                                               content,
                                               description)
@@ -79,7 +88,7 @@ Namespace SlideTemplates
         End Function
         Private Function GenerateDescription(slide As PowerPoint.Slide,
                                              Content As String,
-                                             description As Dictionary(Of String, Object))
+                                             description As JObject)
 
             Dim Desc = New Data.Content.Text(Data.Content.TextTypes.Text,
                                               Content,
@@ -87,19 +96,19 @@ Namespace SlideTemplates
             Desc.Render(slide)
             Return Desc
         End Function
-        Private Function GeneratePoints(content As List(Of String), description As Dictionary(Of String, Object))
+        Private Function GeneratePoints(content As List(Of String), description As JObject)
 
         End Function
-        Private Function GenerateImage(tempPath As String, description As Dictionary(Of String, Object))
+        Private Function GenerateImage(tempPath As String, description As JObject)
         End Function
-        Private Function GenerateCosmetic(description As Dictionary(Of String, Object))
+        Private Function GenerateCosmetic(description As JObject)
         End Function
 
         Private Function Test_ContentAndLayout(content As SlideContentKeyValuePairType, layout As SlideLayoutComponentType)
             ' TODO : Customize the check by removing the Cosmetic Keys from the layout
 
-            Dim layoutKeys = layout.Keys
-            Dim contentKeys = content.Keys
+            Dim layoutKeys = layout.Properties().Select(Function(p) p.Name).ToList()
+            Dim contentKeys = content.Properties().Select(Function(p) p.Name).ToList()
             Dim areKeysMatching As Boolean = layoutKeys.Count = contentKeys.Count AndAlso layoutKeys.All(Function(key) contentKeys.Contains(key))
 
             Return areKeysMatching

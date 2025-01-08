@@ -9,6 +9,7 @@ Imports System.Diagnostics
 Imports Newtonsoft.Json
 Imports System.IO
 Imports AutoSlider.SlideTemplates.Enums
+Imports Newtonsoft.Json.Linq
 
 Public Class Slide_Designer
     Private Sub Slide_Designer_Load(ByVal sender As System.Object, ByVal e As RibbonUIEventArgs) Handles MyBase.Load
@@ -170,7 +171,6 @@ Public Class Slide_Designer
         End If
 
     End Sub
-
 
     Private Function CaptureShapeProperties(shape As Shape)
         Dim shapeProperties As New Dictionary(Of String, Object)
@@ -352,4 +352,47 @@ Public Class Slide_Designer
             Return Processor.LayoutComponents.EnumToString(LayoutComponents.Cosmetic)
         End Try
     End Function
+
+    Private Sub btnTestGenerator_Click(sender As Object, e As RibbonControlEventArgs) Handles btnTestGenerator.Click
+        Dim pptApp = Globals.ThisAddIn.Application
+        Dim activePresentation As Presentation = pptApp.ActivePresentation
+        Dim activeWindow As DocumentWindow = pptApp.ActiveWindow
+
+        Debug.WriteLine($"Entering the btnAutoSlide Function {pptApp} {activePresentation} {activeWindow}")
+        Debug.WriteLine($"Current Slide Porps {activeWindow.ViewType} ")
+
+        If activeWindow.ViewType = PpViewType.ppViewNormal Then
+            Dim currentSlide As Slide = activeWindow.View.Slide
+            Dim newSlideIndex As Integer = currentSlide.SlideIndex + 1
+
+            Dim newSlide As Slide = activePresentation.Slides.Add(newSlideIndex, PpSlideLayout.ppLayoutBlank)
+
+            'TODO: Write Steps to Extract the text from the slide 
+
+            'TODO: Write Steps to Transform the text to the different contents 
+
+            'TODO: Write Steps to Find the Suitable Layouts from the predefined layouts 
+
+            'Generating New Slide based on the available content
+            Dim jsonPath As String = "C:\Temp\LayoutTest.json"
+
+            Dim jsonContent As String = File.ReadAllText(jsonPath)
+
+            Dim jsonData As JObject = JsonConvert.DeserializeObject(Of JObject)(jsonContent)
+
+            Debug.WriteLine($"{jsonData}")
+
+            Dim contentJObject = New JObject()
+            contentJObject("Title") = "Test Title"
+            contentJObject("Image") = "Test Title"
+            contentJObject("Description") = "Test Title"
+            contentJObject("Points") = New JArray("Item 1", "Item 2", "Item 3")
+            contentJObject("Cosmetic") = "Nothing"
+
+            Dim NewSlide As SlideTemplates.Layouts = New SlideTemplates.Layouts()
+
+
+        End If
+
+    End Sub
 End Class

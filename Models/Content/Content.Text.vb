@@ -1,6 +1,7 @@
 ﻿Imports Microsoft.Office.Interop.PowerPoint
 Imports Microsoft.Office.Core
 Imports Shape = Microsoft.Office.Interop.PowerPoint.Shape
+Imports Newtonsoft.Json.Linq
 
 Namespace Data.Content
     Public Enum TextTypes
@@ -13,7 +14,7 @@ Namespace Data.Content
     Public Class Text
         Private _content As String
         Private _type As TextTypes
-        Private _description As Dictionary(Of String, Object)
+        Private _description As JObject
         Private _rerender As Boolean = False
         Public Property Rerender As Boolean
             Set(value As Boolean)
@@ -46,8 +47,8 @@ Namespace Data.Content
             End Set
         End Property
 
-        Public Property Description As Dictionary(Of String, Object)
-            Set(value As Dictionary(Of String, Object))
+        Public Property Description As JObject
+            Set(value As JObject)
                 Rerender = True
                 _description = value
             End Set
@@ -57,7 +58,7 @@ Namespace Data.Content
             End Get
         End Property
 
-        Public Sub New(type As TextTypes, content As String, description As Dictionary(Of String, Object))
+        Public Sub New(type As TextTypes, content As String, description As JObject)
             Me._type = type
             Me._content = content
             Me._description = description
@@ -65,13 +66,13 @@ Namespace Data.Content
         End Sub
 
         Public Sub Render(NewSlide As Slide)
-            If (Description("Type") = MsoShapeType.msoTextBox.ToString()) Then
+            If (CType(Description("Type").ToString(), MsoShapeType) = MsoShapeType.msoTextBox) Then
                 Dim Orientation = MsoOrientation.msoOrientationHorizontal
 
-                Dim Left = Description("Left")
-                Dim Top = Description("Top")
-                Dim Width = Description("Width")
-                Dim Height = Description("Left")
+                Dim Left As Integer = Description("Left")
+                Dim Top As Integer = Description("Top")
+                Dim Width As Integer = Description("Width")
+                Dim Height As Integer = Description("Left")
 
                 Dim TextBox As Shape = NewSlide.Shapes.AddTextbox(Orientation, Left, Top, Width, Height)
                 TextBox.TextFrame.TextRange.Text = _content
@@ -79,7 +80,7 @@ Namespace Data.Content
                 TextBox.Rotation = Description("Rotation")
                 ' ReadOnlyProperty TextBox.ZOrderPosition = Description("ZOrderPosition")
                 TextBox.Rotation = Description("Rotation")
-                TextBox.Visible = CType(Description("Visible"), MsoTriState)
+                TextBox.Visible = CType(Description("Visible").ToString(), MsoTriState)
                 TextBox.TextFrame.TextRange.Font.Name = Description("TextFontName")
                 TextBox.TextFrame.TextRange.Font.Size = Description("TextFontSize")
 

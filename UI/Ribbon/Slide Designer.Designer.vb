@@ -49,9 +49,12 @@
         Me.Group2 = Me.Factory.CreateRibbonGroup
         Me.btnCaptureLayout = Me.Factory.CreateRibbonButton
         Me.Button1 = Me.Factory.CreateRibbonButton
+        Me.Group3 = Me.Factory.CreateRibbonGroup
+        Me.btnTestGenerator = Me.Factory.CreateRibbonButton
         Me.tbSlideGenerator.SuspendLayout()
         Me.Group1.SuspendLayout()
         Me.Group2.SuspendLayout()
+        Me.Group3.SuspendLayout()
         Me.SuspendLayout()
         '
         'tbSlideGenerator
@@ -59,6 +62,7 @@
         Me.tbSlideGenerator.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office
         Me.tbSlideGenerator.Groups.Add(Me.Group1)
         Me.tbSlideGenerator.Groups.Add(Me.Group2)
+        Me.tbSlideGenerator.Groups.Add(Me.Group3)
         Me.tbSlideGenerator.Label = "Slide Generator"
         Me.tbSlideGenerator.Name = "tbSlideGenerator"
         '
@@ -104,6 +108,19 @@
         Me.Button1.Name = "Button1"
         Me.Button1.ShowImage = True
         '
+        'Group3
+        '
+        Me.Group3.Items.Add(Me.btnTestGenerator)
+        Me.Group3.Label = "Prototype"
+        Me.Group3.Name = "Group3"
+        '
+        'btnTestGenerator
+        '
+        Me.btnTestGenerator.Image = CType(resources.GetObject("btnTestGenerator.Image"), System.Drawing.Image)
+        Me.btnTestGenerator.Label = "Test Slide"
+        Me.btnTestGenerator.Name = "btnTestGenerator"
+        Me.btnTestGenerator.ShowImage = True
+        '
         'Slide_Designer
         '
         Me.Name = "Slide_Designer"
@@ -115,6 +132,8 @@
         Me.Group1.PerformLayout()
         Me.Group2.ResumeLayout(False)
         Me.Group2.PerformLayout()
+        Me.Group3.ResumeLayout(False)
+        Me.Group3.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -126,6 +145,8 @@
     Friend WithEvents btnCaptureLayout As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents Group2 As Microsoft.Office.Tools.Ribbon.RibbonGroup
     Friend WithEvents Button1 As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents Group3 As Microsoft.Office.Tools.Ribbon.RibbonGroup
+    Friend WithEvents btnTestGenerator As Microsoft.Office.Tools.Ribbon.RibbonButton
 End Class
 
 Partial Class ThisRibbonCollection
