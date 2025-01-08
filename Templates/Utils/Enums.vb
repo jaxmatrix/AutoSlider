@@ -22,6 +22,23 @@
     End Module
 
     Namespace Processor
+        Module General
+            Function TextToEnum(Of T As Structure)(enumString As String) As T
+                Try
+                    ' Ensure the type is an Enum
+                    If Not GetType(T).IsEnum Then
+                        Throw New ArgumentException("T must be an enumerated type")
+                    End If
+
+                    ' Parse the string into the corresponding enum value
+                    Dim enumValue As T = CType([Enum].Parse(GetType(T), enumString, True), T)
+                    Return enumValue
+                Catch ex As Exception
+                    Throw New ArgumentException($"Invalid enum string: '{enumString}' for enum type '{GetType(T).Name}'", ex)
+                End Try
+            End Function
+        End Module
+
         Module SlideComponents
             Function EnumToString(componentEnum As Enums.SlideComponents)
                 Return componentEnum.ToString()

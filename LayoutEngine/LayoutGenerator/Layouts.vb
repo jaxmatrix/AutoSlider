@@ -29,7 +29,7 @@ Namespace SlideTemplates
         Public Property Content As SlideContentKeyValuePairType
             Set(value As SlideContentKeyValuePairType)
                 _rerender = True
-                _content = Content
+                _content = value
             End Set
             Get
                 Return _content
@@ -47,6 +47,8 @@ Namespace SlideTemplates
                 Me.Layout = layout
                 Me.Content = content
 
+                Debug.WriteLine($"Created The Objects {Me.Layout} {Me.Content}")
+
             Catch ex As Exception
                 Debug.WriteLine("Failed to create the layout")
             End Try
@@ -57,14 +59,16 @@ Namespace SlideTemplates
             Dim componentKey = Layout.Properties().Select(Function(p) p.Name).ToList()
             _elements = New SlideElementListType
 
+
+
             For Each Key As String In componentKey
-                Select Case Processor.LayoutComponents.EnumToString(Key)
+                Select Case Processor.LayoutComponents.StringToEnum(Key)
                     Case LayoutComponents.Title
                         GenerateTitle(Slide, Content("Title").ToString(), Layout("Title"))
                     Case LayoutComponents.Description
                         GenerateDescription(Slide, Content("Description").ToString(), Layout("Description"))
                     Case LayoutComponents.Points
-                        GenerateTitle(Slide, Content("Title").ToString(), Layout("Title"))
+                        GeneratePoints(Slide, Content("Points"), Layout("Points"))
                     Case LayoutComponents.Image
                         GenerateTitle(Slide, Content("Title").ToString(), Layout("Title"))
                     Case LayoutComponents.Cosmetic
@@ -96,12 +100,21 @@ Namespace SlideTemplates
             Desc.Render(slide)
             Return Desc
         End Function
-        Private Function GeneratePoints(content As List(Of String), description As JObject)
+        Private Function GeneratePoints(slide As PowerPoint.Slide,
+                                        content As JArray,
+                                        description As JObject)
+            Dim Points = New Data.Content.Points(content, description)
+
+            Points.Render(slide)
+            Return Points
 
         End Function
-        Private Function GenerateImage(tempPath As String, description As JObject)
+        Private Function GenerateImage(slide As PowerPoint.Slide,
+                                       tempPath As String,
+                                       description As JObject)
         End Function
-        Private Function GenerateCosmetic(description As JObject)
+        Private Function GenerateCosmetic(slide As PowerPoint.Slide,
+                                          description As JObject)
         End Function
 
         Private Function Test_ContentAndLayout(content As SlideContentKeyValuePairType, layout As SlideLayoutComponentType)

@@ -2,6 +2,8 @@
 Imports Microsoft.Office.Core
 Imports System.Drawing.Imaging
 Imports Newtonsoft.Json.Linq
+Imports AutoSlider.SlideTemplates.Processor.General
+Imports System.Diagnostics
 
 Namespace Data.Content
     Public Enum PointTypes
@@ -11,7 +13,7 @@ Namespace Data.Content
     End Enum
 
     Public Class Points
-        Private _content As List(Of String)
+        Private _content As JArray
         Private _type As PointTypes
         Private _description As JObject
         Private _rerender As Boolean
@@ -29,11 +31,11 @@ Namespace Data.Content
             End Get
         End Property
 
-        Public Property Content As List(Of String)
+        Public Property Content As JArray
             Get
                 Return _content
             End Get
-            Set(value As List(Of String))
+            Set(value As JArray)
                 _content = value
                 Rerender = True
             End Set
@@ -59,8 +61,8 @@ Namespace Data.Content
             End Set
         End Property
 
-        Public Sub New(content As List(Of String), description As JObject)
-            If CType(description("Type").ToString(), MsoShapeType) = MsoShapeType.msoGroup Then
+        Public Sub New(content As JArray, description As JObject)
+            If TextToEnum(Of MsoShapeType)(description("Type").ToString()) = MsoShapeType.msoGroup Then
                 Me._type = PointTypes.Symbols
                 'TODO : Add functionality to detect other list types 
             End If
@@ -73,32 +75,43 @@ Namespace Data.Content
 
         Public Sub Render(slide As Slide)
 
-            If (description("Type") = MsoShapeType.msoGroup.ToString()) Then
+            If (TextToEnum(Of MsoShapeType)(description("Type").ToString()) = MsoShapeType.msoGroup) Then
                 Dim Orientation = MsoOrientation.msoOrientationHorizontal
 
-                Dim Left = description("Left")
-                Dim Top = description("Top")
-                Dim Width = description("Width")
-                Dim Height = description("Left")
+                Dim Left As Integer = description("Left")
+                Dim Top As Integer = description("Top")
+                Dim Width As Integer = description("Width")
+                Dim Height As Integer = description("Left")
+
+                'Adding the height of the item to ensure that sufficient gap is maintained
+                'Do a proper calculation and improve the implementation
+                _gaps += Height
 
                 Dim ItemShapes As New List(Of PowerPoint.Shape)
                 Dim pointDescription = FindPointFrame(description("GroupItems"))
+                Dim i As Integer = 0
                 For Each point In Me.Content
                     Dim shape As PowerPoint.Shape = GeneratePointItem(point, pointDescription, slide)
 
                     'TODO : Use the layout properties to correct the top and the left position
-                    shape.Top = shape.Top + _gaps
+                    shape.Top = shape.Top + i * _gaps
                     shape.Left = shape.Left
 
                     ItemShapes.Add(shape)
+                    i += 1
                 Next
 
-                Dim shapeIds As Integer() = ItemShapes.Select(Function(s) s.Id).ToArray()
-                Dim shapesToGroup As PowerPoint.ShapeRange = slide.Shapes.Range(shapeIds)
-                Dim groupedPoints As PowerPoint.Shape = shapesToGroup.Group()
+                Dim shapeIds As String() = ItemShapes.Select(Function(s) s.Name).ToArray()
+                Try
+                    Dim shapesToGroup As PowerPoint.ShapeRange = slide.Shapes.Range(shapeIds)
+                    Dim groupedPoints As PowerPoint.Shape = shapesToGroup.Group()
 
-                groupedPoints.Top = Top
-                groupedPoints.Left = Left
+                    groupedPoints.Top = Top
+                    groupedPoints.Left = Left
+
+                Catch ex As Exception
+                    Debug.WriteLine($"Error Creating the elements : {ex.Message}")
+                End Try
 
                 ' TODO : Add Correct Implementation of  Shadows, Glows and Reflection
 
@@ -114,8 +127,8 @@ Namespace Data.Content
 
         Private Function FindPointFrame(groupItems As JArray)
             ' TODO : Find the element with the Point text 
-            Dim PointItem As JObject
-            Dim SideItems As JArray
+            Dim PointItem As New JObject()
+            Dim SideItems As New JArray()
 
             For Each item As JObject In groupItems
                 If item("Text").ToString().Contains("Points") Then
@@ -137,10 +150,12 @@ Namespace Data.Content
             Dim pointShape = slide.Shapes.AddTextbox(MsoTextOrientation.msoTextOrientationHorizontal,
                                                      pointLeft, pointTop, pointWidth, pointHeight)
             pointShape.TextFrame.TextRange.Text = pointText
+            Debug.WriteLine($"PointShape : {pointShape.Id}")
 
             Dim additionalShapes = New List(Of PowerPoint.Shape)
+            additionalShapes.Add(pointShape)
             For Each item In pointTemplateDescription.SideItems
-                Dim Type = CType(item("Type").ToString(), MsoShapeType)
+                Dim Type = TextToEnum(Of MsoShapeType)(item("Type").ToString())
                 Dim Height = item("Height")
                 Dim Width = item("Width")
                 Dim RelativeLeft = item("RelativeLeft")
@@ -148,16 +163,21 @@ Namespace Data.Content
 
                 Dim shape = slide.Shapes.AddShape(Type, RelativeLeft, RelativeTop, Width, Height)
                 ' TODO : Implement Remaining Property of the Shapes 
+                Debug.WriteLine($"Additional Shape : {shape.Id}")
                 additionalShapes.Add(shape)
             Next
 
-            additionalShapes.Add(pointShape)
 
-            Dim shapeIds As Integer() = additionalShapes.Select(Function(s) s.Id).ToArray()
-            Dim shapesToGroup As PowerPoint.ShapeRange = slide.Shpaes.Range(shapeIds)
-            Dim groupedShape As PowerPoint.Shape = shapesToGroup.Group()
+            Dim shapeIds As String() = additionalShapes.Select(Function(s) s.Name).ToArray()
+            Try
+                Dim shapesToGroup As PowerPoint.ShapeRange = slide.Shapes.Range(shapeIds)
+                Dim groupedShape As PowerPoint.Shape = shapesToGroup.Group()
+                Return groupedShape
 
-            Return groupedShape
+            Catch ex As Exception
+                Debug.WriteLine($"Error Gouping shapes: {ex.Message}")
+                Throw
+            End Try
         End Function
     End Class
 

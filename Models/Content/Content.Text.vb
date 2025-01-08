@@ -2,6 +2,7 @@
 Imports Microsoft.Office.Core
 Imports Shape = Microsoft.Office.Interop.PowerPoint.Shape
 Imports Newtonsoft.Json.Linq
+Imports System.Diagnostics
 
 Namespace Data.Content
     Public Enum TextTypes
@@ -66,7 +67,9 @@ Namespace Data.Content
         End Sub
 
         Public Sub Render(NewSlide As Slide)
-            If (CType(Description("Type").ToString(), MsoShapeType) = MsoShapeType.msoTextBox) Then
+            Dim Type = Description("Type").ToString()
+            Debug.WriteLine($"{Type}")
+            If SlideTemplates.Processor.General.TextToEnum(Of MsoShapeType)(Type) = MsoShapeType.msoTextBox Then
                 Dim Orientation = MsoOrientation.msoOrientationHorizontal
 
                 Dim Left As Integer = Description("Left")
@@ -80,7 +83,7 @@ Namespace Data.Content
                 TextBox.Rotation = Description("Rotation")
                 ' ReadOnlyProperty TextBox.ZOrderPosition = Description("ZOrderPosition")
                 TextBox.Rotation = Description("Rotation")
-                TextBox.Visible = CType(Description("Visible").ToString(), MsoTriState)
+                TextBox.Visible = SlideTemplates.Processor.General.TextToEnum(Of MsoTriState)(Description("Visible").ToString())
                 TextBox.TextFrame.TextRange.Font.Name = Description("TextFontName")
                 TextBox.TextFrame.TextRange.Font.Size = Description("TextFontSize")
 

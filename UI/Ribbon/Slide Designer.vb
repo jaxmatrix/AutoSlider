@@ -374,13 +374,13 @@ Public Class Slide_Designer
             'TODO: Write Steps to Find the Suitable Layouts from the predefined layouts 
 
             'Generating New Slide based on the available content
-            Dim jsonPath As String = "C:\Temp\LayoutTest.json"
+            Dim layoutPath As String = "C:\Temp\LayoutTest.json"
 
-            Dim jsonContent As String = File.ReadAllText(jsonPath)
+            Dim layoutContent As String = File.ReadAllText(layoutPath)
 
-            Dim jsonData As JObject = JsonConvert.DeserializeObject(Of JObject)(jsonContent)
+            Dim layoutData As JObject = JsonConvert.DeserializeObject(Of JObject)(layoutContent)
 
-            Debug.WriteLine($"{jsonData}")
+            Debug.WriteLine($"{layoutData}")
 
             Dim contentJObject = New JObject()
             contentJObject("Title") = "Test Title"
@@ -389,9 +389,8 @@ Public Class Slide_Designer
             contentJObject("Points") = New JArray("Item 1", "Item 2", "Item 3")
             contentJObject("Cosmetic") = "Nothing"
 
-            Dim NewSlide As SlideTemplates.Layouts = New SlideTemplates.Layouts()
-
-
+            Dim nextSlide As SlideTemplates.Layouts = New SlideTemplates.Layouts(contentJObject, layoutData)
+            nextSlide.Render(newSlide)
         End If
 
     End Sub
