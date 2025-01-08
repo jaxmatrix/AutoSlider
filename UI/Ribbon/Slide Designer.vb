@@ -151,6 +151,7 @@ Public Class Slide_Designer
             Next
             LayoutProperties(GetLayoutComponentName(LayoutComponents.Cosmetic)) = CosmeticShapes
 
+            'TODO : Send the Data to the backend server to store the  data in MongoDB database
             Dim json As String = JsonConvert.SerializeObject(LayoutProperties, Formatting.Indented)
             Dim randomFileName As String = "DictionaryData_" & Guid.NewGuid().ToString() & ".json"
 

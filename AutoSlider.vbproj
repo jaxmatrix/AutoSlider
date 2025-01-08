@@ -204,6 +204,7 @@
     <Compile Include="Components\LayoutSnapControl.xaml.vb">
       <DependentUpon>LayoutSnapControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LayoutEngine\LayoutGenerator\Class1.vb" />
     <Compile Include="Models\Content\Content.Image.vb" />
     <Compile Include="Models\Content\Content.Text.vb" />
     <Compile Include="Models\Content\Content.TextList.vb" />
@@ -280,9 +281,7 @@
   <ItemGroup>
     <Service Include="{94E38DFF-614B-4CBD-B67C-F211BB35CE8B}" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="LayoutEngine\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
