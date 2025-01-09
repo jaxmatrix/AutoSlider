@@ -1,4 +1,6 @@
-﻿Namespace SlideTemplates
+﻿Imports System.Diagnostics
+
+Namespace SlideTemplates
     Module Enums
         Enum SlideComponents
             TextHeader
@@ -57,6 +59,23 @@
 
             Function StringToEnum(textHint As String)
                 Return CType([Enum].Parse(GetType(Enums.LayoutComponents), textHint), Enums.SlideComponents)
+            End Function
+
+            Function GetContentRequriement(layoutEnum As Enums.LayoutComponents)
+                Select Case layoutEnum
+                    Case Enums.LayoutComponents.Title
+                        Return 1
+                    Case Enums.LayoutComponents.Description
+                        Return 1
+                    Case Enums.LayoutComponents.Points
+                        Return 5
+                    Case Else
+                        Return 0
+                End Select
+            End Function
+            Function GetContentRequriement(layoutEnum As String)
+                Dim enumValue As Enums.LayoutComponents = Processor.LayoutComponents.StringToEnum(layoutEnum)
+                Return GetContentRequriement(enumValue)
             End Function
         End Module
     End Namespace

@@ -133,6 +133,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
@@ -215,6 +216,12 @@
     <Compile Include="ThisAddIn.vb">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\Prompts\GetDescriptionPrompt.Designer.vb">
+      <DependentUpon>GetDescriptionPrompt.vb</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Prompts\GetDescriptionPrompt.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="UI\Ribbon\Slide Designer.Designer.vb">
       <DependentUpon>Slide Designer.vb</DependentUpon>
     </Compile>
@@ -227,6 +234,9 @@
     <Compile Include="Wrappers\LayoutPaneHostControl.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <EmbeddedResource Include="UI\Prompts\GetDescriptionPrompt.resx">
+      <DependentUpon>GetDescriptionPrompt.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\Ribbon\Slide Designer.resx">
       <DependentUpon>Slide Designer.vb</DependentUpon>
     </EmbeddedResource>
@@ -282,7 +292,9 @@
   <ItemGroup>
     <Service Include="{94E38DFF-614B-4CBD-B67C-F211BB35CE8B}" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Intelligence\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

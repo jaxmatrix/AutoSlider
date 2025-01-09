@@ -10,6 +10,8 @@ Imports Newtonsoft.Json
 Imports System.IO
 Imports AutoSlider.SlideTemplates.Enums
 Imports Newtonsoft.Json.Linq
+Imports System.Net.Http
+Imports System.Net.Http.Headers
 
 Public Class Slide_Designer
     Private Sub Slide_Designer_Load(ByVal sender As System.Object, ByVal e As RibbonUIEventArgs) Handles MyBase.Load
@@ -100,7 +102,7 @@ Public Class Slide_Designer
 
     End Sub
 
-    Private Sub btnCaptureLayout_Click(sender As Object, e As RibbonControlEventArgs) Handles btnCaptureLayout.Click
+    Private Async Sub btnCaptureLayout_Click(sender As Object, e As RibbonControlEventArgs) Handles btnCaptureLayout.Click
         'Get the active power point presentation and extract the information from the layout 
         Dim pptApp As Application = Globals.ThisAddIn.Application
         Dim presentation As Presentation = pptApp.ActivePresentation
@@ -109,9 +111,15 @@ Public Class Slide_Designer
 
         'Get the current slide 
         If activeWindow.ViewType = PpViewType.ppViewNormal Then
+
+
             Dim currentSlide As Slide = activeWindow.View.Slide
             Dim LayoutProperties As New Dictionary(Of String, Object)
             Dim CosmeticShapes = New List(Of Dictionary(Of String, Object))
+
+            Dim previewImageId As String = SaveAndSendSlidePreview(currentSlide)
+            Debug.WriteLine($"Preview Image Generated with Id {previewImageId}")
+
 
             For Each shape As Shape In currentSlide.Shapes
                 Dim elementType As SlideComponents = LayoutComponents.Cosmetic
@@ -158,17 +166,61 @@ Public Class Slide_Designer
             LayoutProperties(GetLayoutComponentName(LayoutComponents.Cosmetic)) = CosmeticShapes
 
             'TODO : Send the Data to the backend server to store the  data in MongoDB database
-            Dim json As String = JsonConvert.SerializeObject(LayoutProperties, Formatting.Indented)
-            Dim randomFileName As String = "DictionaryData_" & Guid.NewGuid().ToString() & ".json"
 
             ' Define the file path
-            Dim filePath As String = Path.Combine("C:\Temp\", randomFileName)
 
+            Dim layoutContentDesc As New JObject()
+            For Each prop As String In LayoutProperties.Keys
+                Dim keyCount As Integer = Processor.LayoutComponents.GetContentRequriement(prop).ToString()
+                If keyCount = 0 Then
+                    Continue For
+                End If
+                layoutContentDesc.Add(prop, keyCount)
+            Next
+
+
+            Dim randomFileName As String = "DictionaryData_" & Guid.NewGuid().ToString() & ".json"
+            Dim filePath As String = Path.Combine("C:\Temp\", randomFileName)
             ' Ensure the directory exists
             Directory.CreateDirectory("C:\Temp\")
+            Dim layoutApi As String = "http://localhost:8000/layouts/"
+            LayoutProperties("PreviewImageId") = previewImageId
 
             Try
-                File.WriteAllText(filePath, json)
+                Dim descPrompt As New GetDescriptionPrompt()
+
+                Dim layoutDesc As String = ""
+
+                If descPrompt.ShowDialog() = DialogResult.OK Then
+                    layoutDesc = descPrompt.UserInput
+                End If
+
+                If layoutDesc = "" Then
+                    Throw New Exception("Empty layout description")
+                End If
+
+                Dim jsonString As String = JsonConvert.SerializeObject(LayoutProperties, Formatting.Indented)
+                Dim jsonContentDesc As String = JsonConvert.SerializeObject(layoutContentDesc)
+
+                Dim RequestObject As New JObject From {
+                    {"jsonString", jsonString},
+                    {"layoutContentDesc", jsonContentDesc},
+                    {"description", layoutDesc}
+                }
+
+                Dim requestString As New StringContent(JsonConvert.SerializeObject(RequestObject), Encoding.UTF8, "application/json")
+                Using client As New HttpClient()
+                    Dim response As HttpResponseMessage = Await client.PostAsync(layoutApi, requestString)
+
+                    If response.IsSuccessStatusCode Then
+                        Dim responseBody As String = Await response.Content.ReadAsStringAsync()
+                        Debug.WriteLine($"Layout Update Response : {responseBody}")
+                    Else
+                        Throw New Exception("Error updating the layout")
+                    End If
+                End Using
+
+                File.WriteAllText(filePath, jsonString)
                 Debug.WriteLine("Dictionary saved as JSON at: " & filePath)
             Catch ex As Exception
                 Debug.WriteLine("Error saving JSON: " & ex.Message)
@@ -461,5 +513,44 @@ Public Class Slide_Designer
         Next
 
         Return result
+    End Function
+
+    Public Function SaveAndSendSlidePreview(slide As Slide) As String
+        ' Path to save the slide preview temporarily
+        Dim tempFolder As String = Path.GetTempPath()
+        Dim tempImagePath As String = Path.Combine(tempFolder, "SlidePreview.png")
+        Dim JsonResponse As JObject
+
+        ' PowerPoint Application
+
+        ' Export the current slide as an image
+        slide.Export(tempImagePath, "PNG", 1920, 1080)
+
+        ' Send the image to the FastAPI server
+        Dim apiUrl As String = "http://localhost:8000/upload-slide-preview"
+        Using client As New HttpClient()
+            Using formData As New MultipartFormDataContent()
+                Dim fileContent As New ByteArrayContent(File.ReadAllBytes(tempImagePath))
+                fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/png")
+                formData.Add(fileContent, "file", "SlidePreview.png")
+
+                ' Post the data
+                Dim response As HttpResponseMessage = client.PostAsync(apiUrl, formData).Result
+                If response.IsSuccessStatusCode Then
+                    Debug.WriteLine("Slide preview sent successfully!")
+                    Dim responseJSON As String = response.Content.ReadAsStringAsync().Result
+                    Debug.WriteLine($"{response.Content.ReadAsStringAsync().Result}")
+                    JsonResponse = JObject.Parse(responseJSON)
+                Else
+                    Throw New Exception($"Failed to send slide preview. Status Code : {response.StatusCode}")
+                End If
+            End Using
+        End Using
+
+        ' Clean up the temporary image
+        If File.Exists(tempImagePath) Then
+            File.Delete(tempImagePath)
+        End If
+        Return JsonResponse("file_id")
     End Function
 End Class
