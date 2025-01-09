@@ -18,7 +18,7 @@ Public Class Slide_Designer
 
     End Sub
 
-    Private Sub btnGenerate_Click(sender As Object, e As RibbonControlEventArgs) Handles btnGenerate.Click
+    Private Async Sub btnGenerate_Click(sender As Object, e As RibbonControlEventArgs) Handles btnGenerate.Click
         Dim pptApp As Application = Globals.ThisAddIn.Application
 
         If pptApp.Presentations.Count > 0 AndAlso
@@ -28,6 +28,24 @@ Public Class Slide_Designer
 
             Dim shapeList As New List(Of String)
             For Each shp As Shape In activeSlide.Shapes
+                If shp.Type = MsoShapeType.msoGroup Then
+                    For Each groupItem In shp.GroupItems
+                        Dim shapeInfo2 As String = shp.Name
+
+                        If groupItem.HasTextFrame <> MsoTriState.msoTrue Then
+                            Continue For
+                        End If
+
+                        If groupItem.TextFrame.HasText <> MsoTriState.msoTrue Then
+                            Continue For
+
+                        End If
+
+                        Dim textContent2 As String = groupItem.TextFrame.TextRange.Text
+                        shapeInfo2 = textContent2
+                        shapeList.Add(shapeInfo2)
+                    Next
+                End If
                 Dim shapeInfo As String = shp.Name
 
                 If shp.HasTextFrame <> MsoTriState.msoTrue Then
@@ -40,16 +58,51 @@ Public Class Slide_Designer
                 End If
 
                 Dim textContent As String = shp.TextFrame.TextRange.Text
-                shapeInfo &= " | Text: " & textContent
+                shapeInfo = textContent
                 shapeList.Add(shapeInfo)
             Next
 
             If shapeList.Count > 0 Then
-                MessageBox.Show(String.Join(Environment.NewLine, shapeList),
-                                "Shapes in Active Slide",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information
-                )
+                Try
+                    Using client As New HttpClient()
+                        Dim DummyClasses As New JArray()
+                        DummyClasses.Add(New JObject(New JProperty("name", "Title"),
+                                                     New JProperty("value", 1))
+                                        )
+                        DummyClasses.Add(New JObject(New JProperty("name", "Description"),
+                                                     New JProperty("value", 1))
+                                        )
+                        DummyClasses.Add(New JObject(New JProperty("name", "Points"),
+                                                     New JProperty("value", 5))
+                                        )
+
+                        Dim jsonDummyClasses = JsonConvert.SerializeObject(DummyClasses)
+
+
+                        Dim ContentObject As New JObject()
+                        Dim jsonLines = JsonConvert.SerializeObject(shapeList)
+
+                        ContentObject.Add("lines", JArray.FromObject(shapeList))
+                        ContentObject.Add("classes", DummyClasses)
+
+                        Dim jsonContent As String = JsonConvert.SerializeObject(ContentObject)
+                        Debug.WriteLine($"JSON CONTENT {ContentObject}")
+
+                        Dim content As New StringContent(jsonContent, Encoding.UTF8, "application/json")
+                        Dim api As String = "http://localhost:8000/classify/"
+                        Dim response As HttpResponseMessage = Await client.PostAsync(api, content)
+
+                        If response.IsSuccessStatusCode Then
+                            Dim responseBody As String = Await response.Content.ReadAsStringAsync()
+                            MsgBox($"AI Generated Content {responseBody}")
+                        End If
+
+                    End Using
+
+                Catch ex As Exception
+                    Debug.WriteLine($"Error occured while generating AI insigths {ex.Message}")
+
+                End Try
             Else
                 MessageBox.Show("No shapes found on this slide",
                                 "Shapes in active Slide",
