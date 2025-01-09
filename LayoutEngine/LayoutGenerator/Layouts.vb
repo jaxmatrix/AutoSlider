@@ -112,9 +112,16 @@ Namespace SlideTemplates
         Private Function GenerateImage(slide As PowerPoint.Slide,
                                        tempPath As String,
                                        description As JObject)
+            Dim Image As Data.Content.ImageElement = New Data.Content.ImageElement(tempPath, description)
+            Image.Render(slide)
+
+            Return Image
+
         End Function
         Private Function GenerateCosmetic(slide As PowerPoint.Slide,
-                                          description As JObject)
+                                          description As JArray)
+            Dim Cosmetic As Data.Content.Cosmetic = New Data.Content.Cosmetic(description)
+            Cosmetic.Render(slide)
         End Function
 
         Private Function Test_ContentAndLayout(content As SlideContentKeyValuePairType, layout As SlideLayoutComponentType)

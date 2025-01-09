@@ -131,8 +131,17 @@ Namespace Data.Content
             Dim SideItems As New JArray()
 
             For Each item As JObject In groupItems
-                If item("Text").ToString().Contains("Points") Then
-                    PointItem = item
+                Dim itemType As MsoTriState = TextToEnum(Of MsoShapeType)(item("Type").ToString())
+                If itemType = MsoShapeType.msoTextBox Then
+                    Dim hasText As MsoTriState = TextToEnum(Of MsoTriState)(item("HasText").ToString())
+                    If hasText = MsoTriState.msoTrue Then
+                        If item("Text").ToString().Contains("Points") Then
+                            PointItem = item
+                        End If
+                    Else
+                        SideItems.Add(item)
+                        'TODO : Add functionality of complext list type that can store different structure
+                    End If
                 Else
                     SideItems.Add(item)
                 End If
@@ -175,8 +184,7 @@ Namespace Data.Content
                 Return groupedShape
 
             Catch ex As Exception
-                Debug.WriteLine($"Error Gouping shapes: {ex.Message}")
-                Throw
+                Debug.WriteLine($"Error Grouping shapes: {ex.Message}")
             End Try
         End Function
     End Class

@@ -134,6 +134,11 @@ Public Class Slide_Designer
                     End If
 
                     Debug.WriteLine($"Detected Group {elementType}")
+                ElseIf shape.Type = MsoShapeType.msoPicture Or shape.Type = MsoShapeType.msoLinkedPicture Then
+
+                    elementType = LayoutComponents.Image
+                    LayoutProperties(GetLayoutComponentName(elementType)) = CapturePictureProperties(shape)
+
                 Else
                     If shape.HasTextFrame Then
                         If shape.TextFrame.HasText Then
@@ -304,10 +309,13 @@ Public Class Slide_Designer
                 itemProperties("LineWeight") = groupItem.Line.Weight
             End If
 
+            Dim subProperties = CaptureShapeProperties(groupItem)
+            Dim combinedDict = CombineDictionaries(subProperties, itemProperties)
+
             ' TODO : Add Additional Case for creating a property if the text contains
             ' points and what type of points it is 
 
-            groupItems.Add(itemProperties)
+            groupItems.Add(combinedDict)
         Next
         groupProperties("GroupItems") = groupItems
 
@@ -353,6 +361,49 @@ Public Class Slide_Designer
         End Try
     End Function
 
+    Public Function CapturePictureProperties(
+            shape As Shape
+        ) As Dictionary(Of String, Object)
+
+        Dim tempFolderPath As String = "C:\Temp\ImageCollection"
+        ' Ensure the temporary folder exists
+        If Not Directory.Exists(tempFolderPath) Then
+            Directory.CreateDirectory(tempFolderPath)
+        End If
+
+        ' Validate if the shape is a picture or linked picture
+        If shape.Type <> MsoShapeType.msoPicture AndAlso shape.Type <> MsoShapeType.msoLinkedPicture Then
+            Throw New ArgumentException("The shape is not a picture or linked picture.")
+        End If
+
+        ' Create a dictionary to store the properties
+        Dim properties As New Dictionary(Of String, Object)()
+
+        ' Extract properties
+        properties("Name") = shape.Name
+        properties("Width") = shape.Width
+        properties("Height") = shape.Height
+        properties("Left") = shape.Left
+        properties("Top") = shape.Top
+        properties("Rotation") = shape.Rotation
+        properties("ZOrderPosition") = shape.ZOrderPosition
+        properties("AlternativeText") = shape.AlternativeText
+
+        ' Save the picture to the temporary folder
+        Dim tempImagePath As String = Path.Combine(tempFolderPath, $"{Guid.NewGuid().ToString()}.png")
+        shape.Export(tempImagePath, PpShapeFormat.ppShapeFormatPNG)
+        properties("TempImagePath") = tempImagePath
+
+        ' Add additional properties for linked pictures
+        If shape.Type = MsoShapeType.msoLinkedPicture Then
+            properties("LinkFormat.SourceFullName") = shape.LinkFormat.SourceFullName
+            properties("LinkFormat.AutoUpdate") = shape.LinkFormat.AutoUpdate
+        End If
+
+        ' Return the properties dictionary
+        Return properties
+    End Function
+
     Private Sub btnTestGenerator_Click(sender As Object, e As RibbonControlEventArgs) Handles btnTestGenerator.Click
         Dim pptApp = Globals.ThisAddIn.Application
         Dim activePresentation As Presentation = pptApp.ActivePresentation
@@ -384,7 +435,7 @@ Public Class Slide_Designer
 
             Dim contentJObject = New JObject()
             contentJObject("Title") = "Test Title"
-            contentJObject("Image") = "Test Title"
+            contentJObject("Image") = "C:\Temp\ImageCollection\Picture 13.png"
             contentJObject("Description") = "Test Title"
             contentJObject("Points") = New JArray("Item 1", "Item 2", "Item 3")
             contentJObject("Cosmetic") = "Nothing"
@@ -394,4 +445,21 @@ Public Class Slide_Designer
         End If
 
     End Sub
+
+    Public Function CombineDictionaries(Of TKey, TValue)(dict1 As Dictionary(Of TKey, TValue), dict2 As Dictionary(Of TKey, TValue)) As Dictionary(Of TKey, TValue)
+        ' Create a new dictionary to store the result
+        Dim result As New Dictionary(Of TKey, TValue)()
+
+        ' Add all elements from dict2
+        For Each kvp In dict2
+            result(kvp.Key) = kvp.Value
+        Next
+
+        ' Add all elements from dict1 (overwriting dict2 values if keys overlap)
+        For Each kvp In dict1
+            result(kvp.Key) = kvp.Value
+        Next
+
+        Return result
+    End Function
 End Class
